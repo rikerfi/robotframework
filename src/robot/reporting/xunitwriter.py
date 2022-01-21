@@ -77,6 +77,10 @@ class XUnitFileWriter(ResultVisitor):
         if test.skipped:
             self._writer.element('skipped', attrs={'message': test.message,
                                                    'type': 'SkipExecution'})
+        if test.doc:
+            self._writer.element('property', attrs={'name': 'Documentation', 'value': test.doc})
+        for test_tag in test.tags:
+            self._writer.element('property', attrs={'name': 'tag', 'value': test_tag})
         self._writer.end('testcase')
 
     def _time_as_seconds(self, millis):
