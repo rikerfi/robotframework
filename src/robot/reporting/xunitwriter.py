@@ -57,13 +57,13 @@ class XUnitFileWriter(ResultVisitor):
         )
 
     def end_suite(self, suite):
-        if suite.metadata or suite.doc:
-            self._writer.start('properties')
-            if suite.doc:
-                self._writer.element('property', attrs={'name': 'Documentation', 'value': suite.doc})
-            for meta_name, meta_value in suite.metadata.items():
-                self._writer.element('property', attrs={'name': meta_name, 'value': meta_value})
-            self._writer.end('properties')
+        self._writer.start('properties')
+        if suite.doc:
+            self._writer.element('property', attrs={'name': 'Documentation', 'value': suite.doc})
+        for meta_name, meta_value in suite.metadata.items():
+            self._writer.element('property', attrs={'name': meta_name, 'value': meta_value})
+        self._writer.element('property', attrs={'name': 'source', 'value': suite.source})
+        self._writer.end('properties')
         self._writer.end('testsuite')
 
     def visit_test(self, test):
@@ -77,10 +77,13 @@ class XUnitFileWriter(ResultVisitor):
         if test.skipped:
             self._writer.element('skipped', attrs={'message': test.message,
                                                    'type': 'SkipExecution'})
-        if test.doc:
-            self._writer.element('property', attrs={'name': 'Documentation', 'value': test.doc})
-        for test_tag in test.tags:
-            self._writer.element('property', attrs={'name': 'tag', 'value': test_tag})
+        if test.doc or test.tags:
+            self._writer.start('properties')
+            if test.doc:
+                self._writer.element('property', attrs={'name': 'Documentation', 'value': test.doc})
+            for test_tag in test.tags:
+                self._writer.element('property', attrs={'name': 'tag', 'value': test_tag})
+            self._writer.end('properties')
         self._writer.end('testcase')
 
     def _time_as_seconds(self, millis):
